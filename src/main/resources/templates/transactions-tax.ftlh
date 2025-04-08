@@ -12,10 +12,10 @@
         <th>Datum</th>
         <th class="text-right">Betrag (HBAR)</th>
         <th>Wechselkurs</th>
-        <th class="text-right">Betrag (EUR)</th>
-        <th class="text-right">Fifo (EUR)</th>
+        <th class="text-right">Betrag (USD)</th>
+        <th class="text-right">Fifo (USD)</th>
         <th class="text-right">Fifo Zuordnung</th>
-        <th class="text-right">Anschaffungskosten<br>Kummulativ (EUR)</th>
+        <th class="text-right">Anschaffungskosten<br>Kummulativ (USD)</th>
         <th>Anmerkung</th>
         <th class="text-right">Betrag Gesamt (HBAR)</th>
       </tr>

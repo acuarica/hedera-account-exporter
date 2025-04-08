@@ -63,12 +63,15 @@ public class CoinBaseClient implements ExchangeClient {
                     .findFirst()
                     .orElseGet(() -> {
                         try {
-                            final String url = String.format(PRICES_URL, pair, DATE_FORMATTER.format(date));
-                            final BigDecimal rate = HttpUtils.getJsonElementForGetRequest(client, url)
-                                    .getAsJsonObject()
-                                    .getAsJsonObject("data")
-                                    .getAsJsonPrimitive("amount")
-                                    .getAsBigDecimal();
+                            // final String url = String.format(PRICES_URL, pair, DATE_FORMATTER.format(date));
+                            // System.err.println(url);
+                            // final BigDecimal rate = HttpUtils.getJsonElementForGetRequest(client, url)
+                            //         .getAsJsonObject()
+                            //         .getAsJsonObject("data")
+                            //         .getAsJsonPrimitive("amount")
+                            //         .getAsBigDecimal();
+                            final BigDecimal rate = new BigDecimal("0.001");
+
                             final Exchange e = new Exchange(dateToUse, pair, rate);
                             exchanges.add(e);
                             return e;

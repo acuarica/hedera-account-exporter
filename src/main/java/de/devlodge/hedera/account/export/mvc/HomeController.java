@@ -68,16 +68,16 @@ public class HomeController {
             return "redirect:/";
         }
         final List<Transaction> transactions = transactionService.getTransactions();
-        final ExchangePair exchangePair = new ExchangePair(Currency.HBAR, Currency.EUR);
+        final ExchangePair exchangePair = new ExchangePair(Currency.HBAR, Currency.USD);
         final BigDecimal exchangeRate = exchangeClient.getCurrentExchangeRate(exchangePair);
-        model.addAttribute("exchangeRate", MvcUtils.getEurFormatted(exchangeRate));
+        model.addAttribute("exchangeRate", MvcUtils.getUsdFormatted(exchangeRate));
 
         if (!transactions.isEmpty()) {
             final BigDecimal hbarAmount = transactions.get(transactions.size() - 1).balanceAfterTransaction();
             model.addAttribute("hbarAmount", MvcUtils.getHBarFormatted(hbarAmount));
 
             final BigDecimal eurAmount = hbarAmount.multiply(exchangeRate);
-            model.addAttribute("eurAmount", MvcUtils.getEurFormatted(eurAmount));
+            model.addAttribute("eurAmount", MvcUtils.getUsdFormatted(eurAmount));
 
             final BigDecimal stackingHbarAmount = transactions.stream()
                     .filter(transaction -> transaction.isStakingReward())
@@ -86,7 +86,7 @@ public class HomeController {
             model.addAttribute("stackedHbar", MvcUtils.getHBarFormatted(stackingHbarAmount));
 
             final BigDecimal stackingEurAmount = stackingHbarAmount.multiply(exchangeRate);
-            model.addAttribute("stackedEur", MvcUtils.getEurFormatted(stackingEurAmount));
+            model.addAttribute("stackedEur", MvcUtils.getUsdFormatted(stackingEurAmount));
         }
         return "home";
     }

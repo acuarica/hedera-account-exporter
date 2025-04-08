@@ -2,7 +2,7 @@ package de.devlodge.hedera.account.export.model;
 
 public enum Currency {
     HBAR("ℏ"),
-    EUR("€"),
+    // CHF("₣"),
     USD("$");
 
     private final String sign;

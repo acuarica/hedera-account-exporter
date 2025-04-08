@@ -129,7 +129,7 @@ public class ChartController {
 
     private BigDecimal getExchangeRate(final Instant timestamp) {
         try {
-            return exchangeClient.getExchangeRate(new ExchangePair(Currency.HBAR, Currency.EUR),
+            return exchangeClient.getExchangeRate(new ExchangePair(Currency.HBAR, Currency.USD),
                     timestamp);
         } catch (Exception e) {
             throw new RuntimeException("Can not get exchange rate", e);

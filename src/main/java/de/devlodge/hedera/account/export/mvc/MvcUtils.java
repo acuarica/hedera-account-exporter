@@ -16,20 +16,22 @@ public class MvcUtils {
         df.setMaximumFractionDigits(2);
         df.setMinimumFractionDigits(2);
         df.setGroupingUsed(true);
-        return df.format(hbarAmount) + " ℏ";
+        // return df.format(hbarAmount) + " ℏ";
+        return df.format(hbarAmount) + "";
     }
 
-    public static String getEurFormatted(BigDecimal eurAmount) {
-        return getEurFormatted(eurAmount, 2);
+    public static String getUsdFormatted(BigDecimal amount) {
+        return getUsdFormatted(amount, 4);
     }
 
-    public static String getEurFormatted(BigDecimal eurAmount, int fractionDigits) {
-        Objects.requireNonNull(eurAmount, "eurAmount must not be null");
+    public static String getUsdFormatted(BigDecimal amount, int fractionDigits) {
+        Objects.requireNonNull(amount, "amount must not be null");
         DecimalFormat df = new DecimalFormat();
         df.setMaximumFractionDigits(fractionDigits);
         df.setMinimumFractionDigits(fractionDigits);
         df.setGroupingUsed(true);
-        return df.format(eurAmount) + " €";
+        // return df.format(amount) + " $";
+        return df.format(amount) + "";
     }
 
     public static String formatTimestamp(Instant timestamp) {

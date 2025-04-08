@@ -41,6 +41,7 @@ public class TransactionsController {
         final List<TransactionModel> transactions = transactionService.getTransactions()
                 .stream()
                 .map(t -> convert(t))
+                // .filter(t -> !"SCAM".equals(t.note()))
                 .toList();
         model.addAttribute("transactions", transactions);
         return "transactions";
@@ -70,12 +71,12 @@ public class TransactionsController {
 
     private TransactionModel convert(final Transaction transaction) {
         final BigDecimal exchangeRate = getExchangeRate(transaction);
-        final BigDecimal eurAmount = transaction.amount().multiply(exchangeRate);
-        final BigDecimal eurBalanceAfterTransaction = transaction.balanceAfterTransaction().multiply(exchangeRate);
+        final BigDecimal amount = transaction.amount().multiply(exchangeRate);
+        final BigDecimal balanceAfterTransaction = transaction.balanceAfterTransaction().multiply(exchangeRate);
         final String note = noteService.getNote(transaction).orElseGet(() -> {
             if (transaction.isStakingReward()) {
                 return "Staking Reward";
-            } else if (transaction.amount().doubleValue() < 0.005d) {
+            } else if (Math.abs(transaction.amount().doubleValue()) < 0.005d) {
                 return "SCAM";
             }
             return "";
@@ -87,16 +88,19 @@ public class TransactionsController {
                 MvcUtils.formatTransactionLink(transaction.networkId()),
                 MvcUtils.formatTimestamp(transaction.timestamp()),
                 MvcUtils.getHBarFormatted(transaction.amount()),
-                MvcUtils.getEurFormatted(eurAmount),
+                MvcUtils.getUsdFormatted(amount),
                 note,
                 MvcUtils.getHBarFormatted(transaction.balanceAfterTransaction()),
-                MvcUtils.getEurFormatted(eurBalanceAfterTransaction));
+                MvcUtils.getUsdFormatted(balanceAfterTransaction),
+                transaction.accountId(),
+                MvcUtils.getUsdFormatted(exchangeRate)
+                );
     }
 
 
     private BigDecimal getExchangeRate(final Transaction transaction) {
         try {
-            return exchangeClient.getExchangeRate(new ExchangePair(Currency.HBAR, Currency.EUR),
+            return exchangeClient.getExchangeRate(new ExchangePair(Currency.HBAR, Currency.USD),
                     transaction.timestamp());
         } catch (Exception e) {
             throw new RuntimeException("Can not get exchange rate", e);
@@ -104,8 +108,8 @@ public class TransactionsController {
     }
 
     public record TransactionModel(String id, String hederaTransactionId, String hederaTransactionLink,
-                                   String timestamp, String hbarAmount, String eurAmount,
-                                   String note, String hbarBalanceAfterTransaction, String eurBalanceAfterTransaction) {
+                                   String timestamp, String hbarAmount, String amount,
+                                   String note, String hbarBalanceAfterTransaction, String balanceAfterTransaction, String accountId, String exchangeRate) {
     }
 
 }

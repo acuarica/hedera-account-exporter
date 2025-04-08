@@ -132,12 +132,12 @@ public class TransactionTaxController {
         public TransactionTaxModel toTransactionTaxModel() {
             final String usedFifoByString = usedFifoBy.stream()
                     .map(i -> i.index + " (" + MvcUtils.getHBarFormatted(i.amountInHBAR) + " / "
-                            + MvcUtils.getEurFormatted(i.amountInEur) + ")")
+                            + MvcUtils.getUsdFormatted(i.amountInEur) + ")")
                     .reduce((a, b) -> a + System.lineSeparator() + b)
                     .orElseGet(() -> "");
             final String usedFifoForString = usedFifoFor.stream()
                     .map(i -> i.index + " (" + MvcUtils.getHBarFormatted(i.amountInHBAR) + " / "
-                            + MvcUtils.getEurFormatted(i.amountInEur) + ")")
+                            + MvcUtils.getUsdFormatted(i.amountInEur) + ")")
                     .reduce((a, b) -> a + System.lineSeparator() + b)
                     .orElseGet(() -> "");
             final String usedFifoString;
@@ -153,14 +153,14 @@ public class TransactionTaxController {
             if (isNegative(transaction.amount())) {
                 exchnageRateAsString = "-";
             } else {
-                exchnageRateAsString = MvcUtils.getEurFormatted(
+                exchnageRateAsString = MvcUtils.getUsdFormatted(
                         transaction.amount().multiply(exchangeRate).setScale(2, RoundingMode.HALF_UP));
             }
             final String openFifoInEur;
             if (isNegative(transaction.amount())) {
                 openFifoInEur = "-";
             } else {
-                openFifoInEur = MvcUtils.getEurFormatted(
+                openFifoInEur = MvcUtils.getUsdFormatted(
                         openFifoInHBAR.multiply(exchangeRate).setScale(2, RoundingMode.HALF_UP));
             }
             return new TransactionTaxModel(index,
@@ -168,8 +168,8 @@ public class TransactionTaxController {
                     transaction.networkId(),
                     MvcUtils.formatTimestamp(transaction.timestamp()),
                     MvcUtils.getHBarFormatted(transaction.amount()),
-                    MvcUtils.getEurFormatted(euroAmount),
-                    MvcUtils.getEurFormatted(cumulativeCostInEur),
+                    MvcUtils.getUsdFormatted(euroAmount),
+                    MvcUtils.getUsdFormatted(cumulativeCostInEur),
                     note,
                     MvcUtils.getHBarFormatted(transaction.balanceAfterTransaction()),
                     openFifoInEur,
@@ -192,7 +192,7 @@ public class TransactionTaxController {
 
     private BigDecimal getExchangeRate(final Transaction transaction) {
         try {
-            return exchangeClient.getExchangeRate(new ExchangePair(Currency.HBAR, Currency.EUR),
+            return exchangeClient.getExchangeRate(new ExchangePair(Currency.HBAR, Currency.USD),
                     transaction.timestamp());
         } catch (Exception e) {
             throw new RuntimeException("Can not get exchange rate", e);

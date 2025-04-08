@@ -51,11 +51,13 @@ public class HederaClient implements LedgerClient {
         try {
             final Instant timestamp = getInstantFromTimestamp(hederaTransaction.timestamp());
             final BigDecimal hbarAmount = new BigDecimal(hederaTransfer.amount()).divide(TINY_BAR_TO_HBAR_FACTOR);
+            // final String to = hederaTransfer.account();
+            // System.out.println(to);
             final BigDecimal hbarBalance = account.addHbarBalance(hbarAmount);
             return new Transaction(Network.HEDERA_MAINNET, UUID.randomUUID(), hederaTransaction.transaction_id(),
                     timestamp, hbarAmount,
                     isStakingReward,
-                    hbarBalance);
+                    hbarBalance, account.getAccountId());
         } catch (Exception e) {
             throw new RuntimeException("Can not create transaction", e);
         }
