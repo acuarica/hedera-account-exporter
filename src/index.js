@@ -1,20 +1,13 @@
-
 import assert from 'assert/strict';
-
-import { MirrorNodeClient } from './mirror-node-client.js';
-import { csv } from './csv.js';
-import { fmt } from './fmt.js';
-import { Forex } from './exchange-rate.js';
-
-const mirrorNodeClient = new MirrorNodeClient();
-const forex = new Forex();
 
 /**
  * 
  * @param {string} accountId 
  * @param {readonly ('USD' | 'CHF')[]} currencies 
+ * @param {import('./mirror-node-client.js').MirrorNodeClient} mirrorNodeClient
+ * @param {import('./exchange-rate.js').Forex} forex
  */
-async function getTransfers(accountId, currencies) {
+export async function getTransfers(accountId, currencies, mirrorNodeClient, forex) {
     const txs = (await mirrorNodeClient.getTransactionsOf(accountId)).map(tx => {
         assert(tx.charged_tx_fee > 0, 'Charged transaction fee cannot be negative');
         assert(new Set(tx.transfers.map(t => t.account)).size === tx.transfers.length, 'transfers has repeated account');
@@ -50,6 +43,7 @@ async function getTransfers(accountId, currencies) {
                 accum: 0n,
                 balanceAt: 0n,
                 diff: 0n,
+                remarks: '',
                 'HBAR-USD': '',
                 'HBAR-CHF': '',
             })),
@@ -78,28 +72,8 @@ async function getTransfers(accountId, currencies) {
 
     const total = transfers.reduce((p, c) => p + c.amount, 0n);
     const balances = await mirrorNodeClient.getBalancesOf(accountId);
+    assert(balances.length === 1);
+    assert(balances[0].account === accountId);
 
-    return { total, balances, transfers };
+    return { total, balance: BigInt(balances[0].balance), transfers };
 }
-
-const currencies = /**@type{const}*/(['USD', 'CHF']);
-const accounts = ['0.0.4601352', '0.0.5007959'];
-
-const tss = await Promise.all(accounts.map(account => getTransfers(account, currencies)));
-
-mirrorNodeClient.httpCache.save();
-forex.httpCache.save();
-
-const table = tss.flatMap(ts => ts.transfers).map(t => ({
-    Date: t.date.toISOString().slice(0, 10),
-    Account: t.account,
-    'Transaction ID': t.transactionId,
-    Amount: fmt(t.amount),
-    Accum: fmt(t.accum),
-    'Balance at': fmt(t.balanceAt),
-    Diff: fmt(t.diff),
-    'HBAR-USD': t['HBAR-USD'],
-    'HBAR-CHF': t['HBAR-CHF'],
-}));
-
-process.stdout.write(csv(table));

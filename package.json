@@ -1,6 +1,6 @@
 {
   "name": "hedera-account-exporter",
-  "description": "",
+  "description": "Hedera Account Exporter",
   "version": "0.1.0",
   "type": "module",
   "exports": {
@@ -22,6 +22,9 @@
   "scripts": {
     "check": "tsc",
     "test": "mocha"
+  },
+  "dependencies": {
+    "commander": "^13.1.0"
   },
   "devDependencies": {
     "@types/chai": "^5.2.1",
