@@ -3,20 +3,19 @@ import assert from 'assert/strict';
 
 import { MirrorNodeClient } from './mirror-node-client.js';
 import { csv } from './csv.js';
+import { fmt } from './fmt.js';
 import { Forex } from './exchange-rate.js';
 
-const ONE_HBAR = 100_000_000;
-
-const m = new MirrorNodeClient();
+const mirrorNodeClient = new MirrorNodeClient();
 const forex = new Forex();
 
 /**
  * 
  * @param {string} accountId 
- * @param {string[]} currencies 
+ * @param {readonly ('USD' | 'CHF')[]} currencies 
  */
 async function getTransfers(accountId, currencies) {
-    const txs = (await m.getTransactionsOf(accountId)).map(tx => {
+    const txs = (await mirrorNodeClient.getTransactionsOf(accountId)).map(tx => {
         assert(tx.charged_tx_fee > 0, 'Charged transaction fee cannot be negative');
         assert(new Set(tx.transfers.map(t => t.account)).size === tx.transfers.length, 'transfers has repeated account');
         assert(new Set(tx.staking_reward_transfers.map(t => t.account)).size === tx.staking_reward_transfers.length, 'staking_reward_transfers has repeated account');
@@ -51,6 +50,8 @@ async function getTransfers(accountId, currencies) {
                 accum: 0n,
                 balanceAt: 0n,
                 diff: 0n,
+                'HBAR-USD': '',
+                'HBAR-CHF': '',
             })),
             // ...tx.staking_reward_transfers.map(t => ({ ...t, transaction_id: tx.transaction_id })),
         ])
@@ -60,7 +61,7 @@ async function getTransfers(accountId, currencies) {
     let accum = 0n;
     for (const t of transfers) {
         assert(prevDate < t.date);
-        const b = await m.getBalancesOfAt(accountId, t.date.getTime() / 1000);
+        const b = await mirrorNodeClient.getBalancesOfAt(accountId, t.date.getTime() / 1000);
         prevDate = t.date;
         t.accum = accum;
         accum += t.amount;
@@ -76,22 +77,29 @@ async function getTransfers(accountId, currencies) {
     }
 
     const total = transfers.reduce((p, c) => p + c.amount, 0n);
-    const balances = await m.getBalancesOf(accountId);
+    const balances = await mirrorNodeClient.getBalancesOf(accountId);
 
     return { total, balances, transfers };
 }
 
-const currencies = ['USD', 'CHF']
+const currencies = /**@type{const}*/(['USD', 'CHF']);
 const accounts = ['0.0.4601352', '0.0.5007959'];
 
 const tss = await Promise.all(accounts.map(account => getTransfers(account, currencies)));
 
-m.httpCache.save();
+mirrorNodeClient.httpCache.save();
 forex.httpCache.save();
 
-const table = tss.flatMap(ts => ts.transfers);
+const table = tss.flatMap(ts => ts.transfers).map(t => ({
+    Date: t.date.toISOString().slice(0, 10),
+    Account: t.account,
+    'Transaction ID': t.transactionId,
+    Amount: fmt(t.amount),
+    Accum: fmt(t.accum),
+    'Balance at': fmt(t.balanceAt),
+    Diff: fmt(t.diff),
+    'HBAR-USD': t['HBAR-USD'],
+    'HBAR-CHF': t['HBAR-CHF'],
+}));
 
-table.forEach(t => {
-    t.date = t.date.toISOString().slice(0, 10);
-});
 process.stdout.write(csv(table));
