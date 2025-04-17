@@ -39,11 +39,11 @@ export async function getTransfers(accountId, currencies, mirrorNodeClient, fore
                 date: new Date(Number(tx.consensus_timestamp) * 1000),
                 account: t.account,
                 amount: t.amount,
+                remarks: t.amount < 50_000n ? 'Probably Spam' : '',
                 transactionId: tx.transaction_id,
                 accum: 0n,
                 balanceAt: 0n,
                 diff: 0n,
-                remarks: '',
                 'HBAR-USD': '',
                 'HBAR-CHF': '',
             })),
@@ -70,10 +70,14 @@ export async function getTransfers(accountId, currencies, mirrorNodeClient, fore
         }
     }
 
-    const total = transfers.reduce((p, c) => p + c.amount, 0n);
+    const total = accum;
     const balances = await mirrorNodeClient.getBalancesOf(accountId);
     assert(balances.length === 1);
     assert(balances[0].account === accountId);
 
-    return { total, balance: BigInt(balances[0].balance), transfers };
+    return {
+        total,
+        balance: BigInt(balances[0].balance),
+        transfers,
+    };
 }
