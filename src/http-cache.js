@@ -3,10 +3,12 @@ import { readFileSync, writeFileSync } from 'fs';
 
 const log = debuglog('http-cache');
 
+/**
+ * 
+ */
 export class HttpCache {
 
     /**
-     * 
      * @param {string} path 
      */
     constructor(path) {
@@ -19,7 +21,7 @@ export class HttpCache {
     }
 
     /**
-     * @template T
+     * @template [T=unknown]
      * @param {string} url 
      * @returns {Promise<T>}
      */
@@ -41,6 +43,9 @@ export class HttpCache {
         return json;
     }
 
+    /**
+     * 
+     */
     save() {
         writeFileSync(this.path, JSON.stringify(this.cache, undefined, 4));
     }

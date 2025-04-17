@@ -1,7 +1,6 @@
-import { HttpCache } from "./get.js";
+import { HttpCache } from "./http-cache.js";
 
 export class Forex {
-
     constructor() {
         this.httpCache = new HttpCache('exchange-rate.cache.json');
     }
