@@ -9,9 +9,10 @@ export class Forex {
      * 
      * @param {string} currency 
      * @param {Date} date 
+     * @returns {Promise<import("./coinbase.js").Price>}
      */
-    getExchangeRate(currency, date) {
+    async getExchangeRate(currency, date) {
         const url = `https://api.coinbase.com/v2/prices/HBAR-${currency}/spot?date=${date.toISOString().slice(0, 10)}`;
-        return this.httpCache.get(url);
+        return /**@type{import("./coinbase.js").Price}*/(await this.httpCache.get(url));
     }
 }

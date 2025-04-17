@@ -12,7 +12,7 @@ export class MirrorNodeClient {
     /**
      * @param {string} accountId 
      * @param {string} transactionType
-     * @returns {Promise<import('./def.js').Transaction[]>}
+     * @return {Promise<import('./def.js').TransactionsResponse['transactions']>}
      */
     getTransactionsOf(accountId, transactionType = 'CRYPTOTRANSFER') {
         const url = `${this.baseUrl}/api/v1/transactions?account.id=${accountId}&order=asc&transactiontype=${transactionType}&result=success&limit=100`;
@@ -21,6 +21,7 @@ export class MirrorNodeClient {
 
     /**
      * @param {string} accountId 
+     * @return {Promise<import('./def.js').BalancesResponse['balances']>}
      */
     getBalancesOf(accountId) {
         const url = `${this.baseUrl}/api/v1/balances?account.id=${accountId}&order=asc&limit=100`;
@@ -30,6 +31,7 @@ export class MirrorNodeClient {
     /**
      * @param {string} accountId 
      * @param {number} timestamp;
+     * @return {Promise<import('./def.js').BalancesResponse['balances']>}
      */
     getBalancesOfAt(accountId, timestamp) {
         const url = `${this.baseUrl}/api/v1/balances?account.id=${accountId}&timestamp=${timestamp}&order=asc&limit=100`;
@@ -38,13 +40,15 @@ export class MirrorNodeClient {
 
     /**
      * 
-     * @template {import('./def.js').PaginatedResponse} T
+     * @template {string} N
+     * @template T
+     * @template {import('./def.js').PaginatedResponse & {[fieldName in N]: T[]}} P
      * @param {string} url 
-     * @param {'transactions' | 'balances'} fieldName
-     * @returns {Promise<T>}
+     * @param {N} fieldName
+     * @returns {Promise<T[]>}
      */
     async #getAll(url, fieldName) {
-        const json = /**@type{T}*/(await this.httpCache.get(url));
+        const json = /**@type{P}*/(await this.httpCache.get(url));
 
         const txs = json[fieldName];
         if ('links' in json && json['links'] !== undefined && 'next' in json['links']) {

@@ -22,7 +22,7 @@ export interface TokenBalance {
 }
 
 export interface TransactionsResponse extends PaginatedResponse {
-    transactions: Transaction[] | undefined;
+    transactions: Transaction[];
 }
 
 /**
