@@ -13,30 +13,19 @@ import { getTransfers } from "../src/index.js";
  * 
  * @param {string[]} accounts 
  * @param {readonly ('USD' | 'CHF')[]} currencies 
- * @param {string} hashscan
  */
-async function main(accounts, currencies, hashscan) {
+async function main(accounts, currencies) {
     const mirrorNodeClient = new MirrorNodeClient();
     const forex = new Forex();
 
-    const tss = await Promise.all(accounts.map(account => getTransfers(account, currencies, mirrorNodeClient, forex)));
+    const tss = await Promise.all(accounts.map(async account => /**@type{const}*/([
+        account, await getTransfers(account, currencies, mirrorNodeClient, forex)
+    ])));
 
     mirrorNodeClient.httpCache.save();
     forex.httpCache.save();
 
-    const table = tss.flatMap(ts => ts.transfers).map(t => ({
-        Date: t.date.toLocaleDateString('en-CH', { timeZone: 'Europe/Zurich' }),
-        Account: t.account,
-        'Transaction ID': hashscan + t.transactionId,
-        'Amount (HBAR)': fmt(t.amount),
-        'Accum (HBAR)': fmt(t.accum),
-        'Balance at (HBAR)': fmt(t.balanceAt),
-        'Diff (HBAR)': fmt(t.diff),
-        'HBAR-USD Rate': t['HBAR-USD'],
-        'HBAR-CHF Rate': t['HBAR-CHF'],
-    }));
-
-    process.stdout.write(csv(table));
+    return Object.fromEntries(tss);
 }
 
 const cmd = program
@@ -44,18 +33,42 @@ const cmd = program
     .version(packageJson.version)
     .addOption(new Option('-c, --currencies <symbols...>', 'specify currency exchange rates').choices(['USD', 'CHF']))
     .option('--hashscan', 'display transaction IDs as links to Hashscan')
+    .option('--summary', 'display total summary')
     .argument('<accounts...>')
     .showHelpAfterError()
     .parse();
 
-const { currencies = [], hashscan } = cmd.opts();
-await main(cmd.args, currencies, hashscan ? 'https://hashscan.io/mainnet/transaction/' : '');
+const { currencies = [], hashscan, summary } = cmd.opts();
+const tss = await main(cmd.args, currencies);
 
-// const currencies = /**@type{const}*/(['USD', 'CHF']);
-// const accounts = ['0.0.4601352', '0.0.5007959'];
-
-// console.log(t1.balances);
-// console.log(t2.balances);
-// console.log(Number(t1.total) / ONE_HBAR);
-// console.log(Number(t2.total) / ONE_HBAR);
-// console.log(Number(t1.total + t2.total) / ONE_HBAR);
+if (summary) {
+    // let total = 0n;
+    // for (const ts of tss) {
+    //     console.info(ts.balance);
+    //     console.info(fmt(ts.total));
+    //     total += ts.total;
+    // }
+    // console.info(total);
+    console.table(Object.fromEntries(Object.entries(tss).map(
+        ([account, { total, balance }]) => [
+            account, {
+                Total: 'ℏ ' + fmt(total),
+                Balance: 'ℏ ' + fmt(balance),
+            }
+        ]
+    )));
+} else {
+    const table = Object.values(tss).flatMap(ts => ts.transfers).map(t => ({
+        Date: t.date.toLocaleDateString('en-CH', { timeZone: 'Europe/Zurich' }),
+        Account: t.account,
+        'Transaction ID': (hashscan ? 'https://hashscan.io/mainnet/transaction/' : '') + t.transactionId,
+        'Amount (HBAR)': fmt(t.amount),
+        'Accum (HBAR)': fmt(t.accum),
+        'Balance at (HBAR)': fmt(t.balanceAt),
+        'Diff (HBAR)': fmt(t.diff),
+        Remarks: t.remarks,
+        'HBAR-USD Rate': t['HBAR-USD'],
+        'HBAR-CHF Rate': t['HBAR-CHF'],
+    }));
+    process.stdout.write(csv(table));
+}
