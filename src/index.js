@@ -1,6 +1,12 @@
 import assert from 'assert/strict';
 
 /**
+ * @param {bigint} n 
+ * @returns {bigint}
+ */
+const abs = n => n < 0 ? -n : n;
+
+/**
  * 
  * @param {string} accountId 
  * @param {readonly ('USD' | 'CHF')[]} currencies 
@@ -14,20 +20,33 @@ export async function getTransfers(accountId, currencies, mirrorNodeClient, fore
         assert(new Set(tx.staking_reward_transfers.map(t => t.account)).size === tx.staking_reward_transfers.length, 'staking_reward_transfers has repeated account');
         assert(tx.transfers.length >= 2, 'transfers is empty or single transfer');
 
-        const transfers = tx.transfers.map(t => ({ ...t, amount: BigInt(t.amount) }));
+        const transfers = tx.transfers.map(t => ({
+            account: t.account,
+            amount: BigInt(t.amount),
+            remarks: '',
+        }));
         const netAmount = transfers.filter(t => t.amount > 0n).reduce((p, c) => p + c.amount, 0n) - BigInt(tx.charged_tx_fee);
         assert(netAmount > 0n, 'Net amount cannot be negative');
 
         let balance = 0n;
 
+        const rewards = [];
         for (const t of transfers) {
             assert(t.amount !== 0n, 'tx amount is zero');
             balance += t.amount;
+            const stakingRewards = tx.staking_reward_transfers.filter(s => s.account === t.account);
+            if (stakingRewards.length > 0) {
+                assert(stakingRewards.length === 1);
+                const amount = BigInt(stakingRewards[0].amount);
+                t.amount -= amount;
+                rewards.push({ account: t.account, amount, remarks: 'Staking Reward' });
+            }
+            t.remarks = abs(t.amount) < 50_000n ? 'Probably Spam' : '';
         }
 
         assert(balance === 0n, 'tx balance is not zero');
         return {
-            transfers,
+            transfers: [...transfers, ...rewards],
             consensus_timestamp: tx.consensus_timestamp,
             transaction_id: tx.transaction_id,
         };
@@ -39,7 +58,7 @@ export async function getTransfers(accountId, currencies, mirrorNodeClient, fore
                 date: new Date(Number(tx.consensus_timestamp) * 1000),
                 account: t.account,
                 amount: t.amount,
-                remarks: t.amount < 50_000n ? 'Probably Spam' : '',
+                remarks: t.remarks,
                 transactionId: tx.transaction_id,
                 accum: 0n,
                 balanceAt: 0n,
@@ -52,7 +71,7 @@ export async function getTransfers(accountId, currencies, mirrorNodeClient, fore
     let prevDate = new Date(2024, 1, 1);
     let accum = 0n;
     for (const t of transfers) {
-        assert(prevDate < t.date);
+        assert(prevDate <= t.date, `Not sorted ${prevDate} / ${t.date}`);
         const b = await mirrorNodeClient.getBalancesOfAt(accountId, t.date.getTime() / 1000);
         prevDate = t.date;
         t.accum = accum;
