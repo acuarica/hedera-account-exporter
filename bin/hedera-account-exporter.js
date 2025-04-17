@@ -32,8 +32,8 @@ const cmd = program
     .description(packageJson.description)
     .version(packageJson.version)
     .addOption(new Option('-c, --currencies <symbols...>', 'specify currency exchange rates').choices(['USD', 'CHF']))
-    .option('--hashscan', 'display transaction IDs as links to Hashscan')
-    .option('--summary', 'display total summary')
+    .addOption(new Option('--summary', 'display total summary'))
+    .addOption(new Option('--hashscan', 'display transaction IDs as links to Hashscan').conflicts('summary'))
     .argument('<accounts...>')
     .showHelpAfterError()
     .parse();
