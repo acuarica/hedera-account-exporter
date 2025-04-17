@@ -44,8 +44,6 @@ export async function getTransfers(accountId, currencies, mirrorNodeClient, fore
                 accum: 0n,
                 balanceAt: 0n,
                 diff: 0n,
-                'HBAR-USD': '',
-                'HBAR-CHF': '',
             })),
             // ...tx.staking_reward_transfers.map(t => ({ ...t, transaction_id: tx.transaction_id })),
         ])
@@ -66,7 +64,7 @@ export async function getTransfers(accountId, currencies, mirrorNodeClient, fore
             const { data } = await forex.getExchangeRate(currency, t.date);
             assert(data.base === 'HBAR');
             assert(data.currency === currency);
-            t[`HBAR-${currency}`] = data.amount;
+            /**@type{import('./hbar.js').Hbar}*/(t)[`HBAR-${currency}`] = data.amount;
         }
     }
 

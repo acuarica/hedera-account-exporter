@@ -51,7 +51,7 @@ if (summary) {
                 Balance: 'ℏ ' + fmt(balance),
                 Status: total === balance ? '✔' : '⍻',
             }
-         ]
+        ]
     )));
 } else {
     const table = Object.values(tss).flatMap(ts => ts.transfers).map(t => ({
@@ -63,8 +63,10 @@ if (summary) {
         'Balance at (HBAR)': fmt(t.balanceAt),
         'Diff (HBAR)': fmt(t.diff),
         Remarks: t.remarks,
-        'HBAR-USD Rate': t['HBAR-USD'],
-        'HBAR-CHF Rate': t['HBAR-CHF'],
+        ...Object.fromEntries(/**@type{string[]}*/(currencies).map(c => [
+            `HBAR-${c} Rate`,
+            /**@type{import('../src/hbar.js').Hbar}*/(t)[`HBAR-${c}`
+            ]])),
     }));
     process.stdout.write(csv(table));
 }
