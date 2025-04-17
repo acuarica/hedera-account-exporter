@@ -1,0 +1,30 @@
+{
+  "name": "hedera-account-exporter",
+  "description": "",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "homepage": "https://github.com/acuarica/hedera-account-exporter#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/acuarica/hedera-account-exporter.git"
+  },
+  "author": "Luis Mastrangelo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/acuarica/hedera-account-exporter/issues"
+  },
+  "keywords": [
+    "hedera"
+  ],
+  "scripts": {
+    "check": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.1",
+    "typescript": "^5.8.3"
+  }
+}
