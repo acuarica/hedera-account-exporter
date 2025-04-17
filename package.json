@@ -24,10 +24,12 @@
     "test": "mocha"
   },
   "dependencies": {
-    "commander": "^13.1.0"
+    "commander": "^13.1.0",
+    "figlet": "^1.8.1"
   },
   "devDependencies": {
     "@types/chai": "^5.2.1",
+    "@types/figlet": "^1.7.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "^22.14.1",
     "chai": "^5.2.0",

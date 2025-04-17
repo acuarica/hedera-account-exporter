@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { program, Option } from 'commander';
+import figlet from 'figlet';
 
 import packageJson from '../package.json' with { type: 'json' }
 import { Forex } from "../src/exchange-rate.js";
@@ -42,20 +43,15 @@ const { currencies = [], hashscan, summary } = cmd.opts();
 const tss = await main(cmd.args, currencies);
 
 if (summary) {
-    // let total = 0n;
-    // for (const ts of tss) {
-    //     console.info(ts.balance);
-    //     console.info(fmt(ts.total));
-    //     total += ts.total;
-    // }
-    // console.info(total);
+    console.info(figlet.textSync('Hedera Account Exporter'));
     console.table(Object.fromEntries(Object.entries(tss).map(
         ([account, { total, balance }]) => [
             account, {
                 Total: 'ℏ ' + fmt(total),
                 Balance: 'ℏ ' + fmt(balance),
+                Status: total === balance ? '✔' : '⍻',
             }
-        ]
+         ]
     )));
 } else {
     const table = Object.values(tss).flatMap(ts => ts.transfers).map(t => ({
