@@ -1,7 +1,11 @@
+import { Decimal } from 'decimal.js';
 
 /**
  * 
  */
-export interface Hbar {
-    [rate : `HBAR-${string}`]: string
+export interface HbarValues {
+    [currency: string]: {
+        rate: Decimal,
+        amount: Decimal,
+    },
 }

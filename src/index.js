@@ -1,5 +1,9 @@
 import assert from 'assert/strict';
 
+import { Decimal } from 'decimal.js';
+
+const ONE_HBAR = new Decimal('100_000_000');
+
 /**
  * @param {bigint} n 
  * @returns {bigint}
@@ -63,8 +67,8 @@ export async function getTransfers(accountId, currencies, mirrorNodeClient, fore
                 accum: 0n,
                 balanceAt: 0n,
                 diff: 0n,
+                values: /**@type{import('./hbar.js').HbarValues}*/({}),
             })),
-            // ...tx.staking_reward_transfers.map(t => ({ ...t, transaction_id: tx.transaction_id })),
         ])
         .filter(t => t.account === accountId);
 
@@ -83,7 +87,10 @@ export async function getTransfers(accountId, currencies, mirrorNodeClient, fore
             const { data } = await forex.getExchangeRate(currency, t.date);
             assert(data.base === 'HBAR');
             assert(data.currency === currency);
-            /**@type{import('./hbar.js').Hbar}*/(t)[`HBAR-${currency}`] = data.amount;
+
+            const rate = new Decimal(data.amount);
+            const amount = rate.mul(new Decimal(Number(t.amount)).div(ONE_HBAR));
+            t.values[currency] = { rate, amount };
         }
     }
 
