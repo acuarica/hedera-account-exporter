@@ -60,7 +60,7 @@ export type TransactionType = 'CRYPTOTRANSFER';
  * 
  */
 export interface Transfer {
-    account: string | null;                          // Network entity ID in the format of shard.realm.num
+    account: string;                          // Network entity ID in the format of shard.realm.num
     amount: number;
     is_approval: boolean | undefined;
 }
