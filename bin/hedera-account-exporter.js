@@ -108,11 +108,27 @@ if (opts.summary) {
         // <td align="right">{{ lookup ../this this }}</td>
         // {{/each}}
 
+
+        const summary = Object.entries(tss).map(
+            ([account, { total, balance }]) => ({
+                account,
+                total,
+                balance,
+                status: total === balance ? '✔' : '⍻',
+            })
+        );
+        summary.push({
+            account: 'Grand Total',
+            total: summary.reduce((acc, { total }) => acc + total, 0n),
+            balance: summary.reduce((acc, { balance }) => acc + balance, 0n),
+            status: '',
+        });
+
         const groups = Object.groupBy(table, ({ date }) => date.getFullYear() + '-' + (date.getMonth() + 1));
         console.log(groups);
         const html = readFileSync('./template.html', 'utf-8');
         const template = Handlebars.compile(html);
-        writeFileSync('output.html', template({ groups: groups, currencies: opts.currencies, symbols }));
+        writeFileSync('output.html', template({ summary, groups: groups, currencies: opts.currencies, symbols }));
     } else {
         process.stdout.write(csv(table));
     }

@@ -20,7 +20,7 @@
             width: 90%;
             border-collapse: collapse;
             margin: 20px auto;
-            font-size: 14px;
+            font-size: 13px;
         }
 
         table,
@@ -81,6 +81,30 @@
 
     <h1>Hedera Account Exporter</h1>
 
+    <h2>Hedera HBAR Coin Distribution (USD and CHF) Summary</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Account</th>
+                <th>Total</th>
+                <th>Balance</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each summary}}
+            <tr>
+                <td>{{ account }}</td>
+                <td align="right">ℏ {{ total }}</td>
+                <td align="right">ℏ {{ balance }}</td>
+                <td>{{ status }}</td>
+            </tr>
+            {{/each}}
+        </tbody>
+
+    </table>
+
     <h2>Hedera HBAR Coin Distribution (USD and CHF) Details</h2>
 
     <table border="1" cellpadding="5" cellspacing="2">
@@ -105,7 +129,7 @@
 
             <tr>
                 <td colspan="10" style="font-weight: bolder;">
-                {{@key}}
+                    {{@key}}
                 </td>
             </tr>
 
