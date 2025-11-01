@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { program, Option } from 'commander';
+import { Decimal } from 'decimal.js';
 import figlet from 'figlet';
 import Handlebars from 'handlebars';
 
@@ -27,6 +28,17 @@ const currencyFormat = new Intl.NumberFormat('en-CH', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
 });
+
+/**
+ * @param {bigint} n 
+ * @returns {string}
+ */
+function formatHbar(n) {
+    return 'ℏ ' + new Intl.NumberFormat('en-US', {
+        minimumFractionDigits: 4,
+        maximumFractionDigits: 4,
+    }).format(fmt(n));
+}
 
 /**
  * 
@@ -63,15 +75,27 @@ const tss = await main(cmd.args, opts.currencies);
 
 if (opts.summary) {
     console.info(figlet.textSync('Hedera Account Exporter'));
+
+    const { data: hbarPrice } = await Forex.getCurrentExchangeRate('USD');
+    console.info(`Current HBAR-USD Rate: $ ${hbarPrice.amount}`);
+    const hbarToUsd = (/**@type{bigint}*/amount) => {
+        const rate = new Decimal(hbarPrice.amount);
+        return rate.mul(new Decimal(fmt(amount))).toString();
+    };
+
     console.table(Object.fromEntries(Object.entries(tss).map(
         ([account, { total, balance }]) => [
             account, {
-                Total: 'ℏ ' + fmt(total),
-                Balance: 'ℏ ' + fmt(balance),
+                Total: formatHbar(total),
+                Balance: formatHbar(balance),
+                USD: `$ ${currencyFormat.format(hbarToUsd(total))}`,
                 Status: total === balance ? '✔' : '⍻',
             }
         ]
     )));
+
+    const grandTotal = Object.values(tss).reduce((grandTotal, { total }) => grandTotal + total, 0n);
+    console.info(`         Total: ${formatHbar(grandTotal)} ($ ${currencyFormat.format(hbarToUsd(grandTotal))})`);
 } else {
     const table = Object.values(tss).flatMap(ts => ts.transfers).map(t => ({
         // ...t,
