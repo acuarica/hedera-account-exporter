@@ -1,0 +1,93 @@
+
+- currencies:
+  - id: CHF
+    symbol: fr
+  - id: EUR
+    symbol: €
+  - id: USD
+    symbol: $
+  - id: HBAR
+    symbol: ℏ
+
+- accounts:
+  - id: PostFinance
+    accounts:
+      - name: Private Account CHF
+        currency: CHF
+      - name: Private Account USD
+        currency: USD
+      - name: Savings Account CHF
+        currency: CHF
+      - name: E-asset Management
+        currency: CHF
+
+  - id: IBKR
+    name: Interactive Brokers
+    accounts:
+      - name: Cash CHF
+        currency: CHF
+      - name: Cash USD
+        currency: USD
+    positions:
+      - name: EPAM
+      - name: VGT
+      - name: VOO
+      - name: VT
+      - name: VWO
+
+  - id: Hedera
+    name: Hedera Network non-custodial accounts
+    currency: HBAR
+    accounts:
+      - id: 0.0.4601352
+        name: 0.0.4601352-xiiml
+      - id: 0.0.5007959
+        name: 0.0.5007959-wpaaf
+        desc: Ledger Nano S Plus - Amethyst Purple
+      - id: 0.0.10060230
+        name: 0.0.10060230-cslie
+        desc: Tangem 3 Cards set - Electra Sea
+
+  - name: UBS
+    accounts:
+      - name: Rent
+        currency: CHF
+
+  - name: FinPension
+    accounts:
+      - id: IIpillar
+        name: Vested Benefits Account
+        currency: CHF
+
+  - name: TrueWealth
+    accounts:
+      - name: 3a+untied portfolio
+        currency: CHF
+
+  - id: SwissBorg
+    accounts:
+      - id: HBAR
+        currency: HBAR
+      - id: CHF
+        currency: CHF
+      - id: USD
+        currency: USD
+
+  - id: Revolut
+    accounts:
+      - id: CHF
+        currency: CHF
+      - id: USD
+        currency: USD
+
+  - id: Wise
+    accounts:
+      - id: CHF
+        currency: CHF
+
+  - id: willbe
+    accounts:
+      - id: CHF
+        currency: CHF
+      - id: USD
+        currency: USD
