@@ -20,7 +20,7 @@
     "hedera"
   ],
   "scripts": {
-    "check": "tsc",
+    "tsc": "tsc",
     "test": "mocha"
   },
   "dependencies": {
