@@ -68,6 +68,10 @@
     accounts:
       - id: HBAR
         currency: HBAR
+        receive:
+          network: Hedera
+          address: 0.0.9167857-hpjid
+          memo: 196832741 
       - id: CHF
         currency: CHF
       - id: USD
